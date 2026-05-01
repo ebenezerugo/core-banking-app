@@ -1,0 +1,39 @@
+[package]
+name = "api-gateway"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "api-gateway"
+path = "src/main.rs"
+
+[dependencies]
+shared = { path = "../shared" }
+domain = { path = "../domain" }
+customers = { path = "../customers" }
+loans = { path = "../loans" }
+accounts = { path = "../accounts" }
+accounting = { path = "../accounting" }
+payments = { path = "../payments" }
+transactions = { path = "../transactions" }
+charges = { path = "../charges" }
+
+axum = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sqlx = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+rust_decimal = { workspace = true }
+anyhow = { workspace = true }
+jsonwebtoken = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+async-nats = { workspace = true }
