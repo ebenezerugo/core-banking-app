@@ -20,7 +20,7 @@ impl PostgresEventStore {
 impl EventStore for PostgresEventStore {
     async fn append(&self, event: EventEnvelope) -> Result<(), DomainError> {
         let seq: i64 = sqlx::query_scalar(
-            "SELECT COALESCE(MAX(sequence_number), 0) FROM event_store WHERE aggregate_id = $1",
+            "SELECT COALESCE(MAX(sequence_number), 0) FROM domain_events WHERE aggregate_id = $1",
         )
         .bind(event.aggregate_id)
         .fetch_one(&self.pool)
@@ -28,7 +28,7 @@ impl EventStore for PostgresEventStore {
         .map_err(|e| DomainError::ValidationError(e.to_string()))?;
 
         sqlx::query(
-            r#"INSERT INTO event_store (id, aggregate_id, aggregate_type, event_type, payload, sequence_number, correlation_id, occurred_at)
+            r#"INSERT INTO domain_events (id, aggregate_id, aggregate_type, event_type, payload, sequence_number, correlation_id, occurred_at)
                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"#,
         )
         .bind(event.id)
@@ -49,7 +49,7 @@ impl EventStore for PostgresEventStore {
     async fn load_events(&self, aggregate_id: Uuid) -> Result<Vec<EventEnvelope>, DomainError> {
         let rows = sqlx::query(
             r#"SELECT id, aggregate_id, aggregate_type, event_type, payload, sequence_number, correlation_id, occurred_at
-               FROM event_store WHERE aggregate_id = $1 ORDER BY sequence_number ASC"#,
+               FROM domain_events WHERE aggregate_id = $1 ORDER BY sequence_number ASC"#,
         )
         .bind(aggregate_id)
         .fetch_all(&self.pool)
@@ -76,7 +76,7 @@ impl EventStore for PostgresEventStore {
     async fn load_snapshot(&self, aggregate_id: Uuid) -> Result<Option<EventEnvelope>, DomainError> {
         let row = sqlx::query(
             r#"SELECT id, aggregate_id, aggregate_type, event_type, payload, sequence_number, correlation_id, occurred_at
-               FROM event_store WHERE aggregate_id = $1 AND event_type = 'Snapshot'
+               FROM domain_events WHERE aggregate_id = $1 AND event_type = 'Snapshot'
                ORDER BY sequence_number DESC LIMIT 1"#,
         )
         .bind(aggregate_id)
